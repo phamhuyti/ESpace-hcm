@@ -144,7 +144,7 @@ void StartSerial(void const *argument)
         Rx_Buffer1[i] = 0;
       }
     }
-    osDelay(1);
+    delay(1);
   }
   /* USER CODE END StartSerial */
 }
@@ -166,12 +166,12 @@ void StartLED(void const *argument)
     for (uint8_t i = 0; i < 101; i++)
     {
       analogWrite(i);
-      osDelay(10);
+      delay(10);
     }
     for (uint8_t i = 101; i > 0; i--)
     {
       analogWrite(i);
-      osDelay(10);
+      delay(10);
     }
   }
   /* USER CODE END StartLED */
