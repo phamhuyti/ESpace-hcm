@@ -1,0 +1,15 @@
+ultrasonic\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/queue.c
+ultrasonic\queue.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+ultrasonic\queue.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+ultrasonic\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+ultrasonic\queue.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+ultrasonic\queue.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+ultrasonic\queue.o: ../Inc/FreeRTOSConfig.h
+ultrasonic\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+ultrasonic\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+ultrasonic\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+ultrasonic\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0/portmacro.h
+ultrasonic\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+ultrasonic\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+ultrasonic\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+ultrasonic\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
