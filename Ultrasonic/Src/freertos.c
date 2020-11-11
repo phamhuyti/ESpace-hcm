@@ -60,7 +60,7 @@ extern uint8_t Rx_Buffer2[128];
 void StartSerial(void const *argument);
 void StartLED(void const *argument);
 
-extern void serial_Read(int uart);
+extern void serial_Read(uint8_t uart, uint8_t size);
 extern int serial_Available(int uart);
 extern void serial_write(int port, uint8_t *text);
 extern void analogWrite(uint8_t pwm);
@@ -136,13 +136,15 @@ void StartSerial(void const *argument)
   /* USER CODE BEGIN StartSerial */
   /* Infinite loop */
   serial_write(2, (uint8_t *)"HELLO UART 111112!!!");
+  osDelay(1000);
+  digitalWrite("A8", GPIO_PIN_RESET);
+  serial_write(2, (uint8_t *)"123");
+  osDelay(1000);
   for (;;)
   {
-    digitalWrite("A8",GPIO_PIN_RESET);
-    serial_write(2, (uint8_t *)"123");
+    digitalWrite("A8", GPIO_PIN_SET);
+    serial_Read(2,9);
     osDelay(1000);
-    digitalWrite("A8",GPIO_PIN_SET);
-		serial_Read(2);
     // if (serial_Available(2))
     // {
     //   serial_write(2, (uint8_t *)"HELLO UART 2!!!");
@@ -173,7 +175,6 @@ void StartSerial(void const *argument)
 * @retval None
 */
 /* USER CODE END Header_StartLED */
-int a;
 void StartLED(void const *argument)
 {
   /* USER CODE BEGIN StartLED */

@@ -144,15 +144,15 @@ void serial_write(int port, uint8_t *text)
   }
 }
 // Read Serial data buffer
-void serial_Read(int uart)
+void serial_Read(uint8_t uart, uint8_t size)
 {
   if (uart == 1)
   {
-    HAL_UART_Receive_DMA(&huart1, Rx_Buffer1, 3);
+    HAL_UART_Receive_DMA(&huart1, Rx_Buffer1, size);
   }
   else
   {
-    HAL_UART_Receive_DMA(&huart2, Rx_Buffer2, 3);
+    HAL_UART_Receive_DMA(&huart2, Rx_Buffer2, size);
   }
 }
 // Check data ready to read
