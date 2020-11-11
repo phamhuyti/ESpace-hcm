@@ -42,7 +42,7 @@
 #define LOW GPIO_PIN_RESET
 #define TRUE 1
 #define FALSE 0
-#define TIMEOUT_UART1 100
+#define TIMEOUT_UART1 1000
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -312,18 +312,18 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
-	HAL_UART_Receive_IT(&huart2, Rx_data2, 1);
+  HAL_UART_Receive_IT(&huart2, Rx_data2, 1);
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
+  delay(10);
+  serial_write(2, "123");
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
   while (1)
   {
     /* USER CODE END WHILE */
-    HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8,GPIO_PIN_RESET);
     delay(10);
-    serial_write(2, "123");
-    HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8,GPIO_PIN_SET);
-		delay(10);
-      serial_Read(2);
+    serial_Read(2);
     delay(100);
     /* USER CODE BEGIN 3 */
   }

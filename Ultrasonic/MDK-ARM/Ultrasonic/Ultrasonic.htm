@@ -3,7 +3,7 @@
 <title>Static Call Graph - [Ultrasonic\Ultrasonic.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image Ultrasonic\Ultrasonic.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Wed Nov 11 13:45:43 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Wed Nov 11 15:06:04 2020
 <BR><P>
 <H3>Maximum Stack Usage =        240 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -593,7 +593,7 @@ Global Symbols
 <LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
 </UL>
 
-<P><STRONG><a name="[6b]"></a>HAL_UART_RxCpltCallback</STRONG> (Thumb, 182 bytes, Stack size 24 bytes, main.o(i.HAL_UART_RxCpltCallback))
+<P><STRONG><a name="[6b]"></a>HAL_UART_RxCpltCallback</STRONG> (Thumb, 190 bytes, Stack size 24 bytes, main.o(i.HAL_UART_RxCpltCallback))
 <BR><BR>[Stack]<UL><LI>Max Depth = 44<LI>Call Chain = HAL_UART_RxCpltCallback &rArr; HAL_UART_Receive_IT
 </UL>
 <BR>[Calls]<UL><LI><a href="#[6c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
@@ -810,7 +810,7 @@ Global Symbols
 
 <P><STRONG><a name="[8e]"></a>__scatterload_zeroinit</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_zeroinit), UNUSED)
 
-<P><STRONG><a name="[21]"></a>main</STRONG> (Thumb, 118 bytes, Stack size 0 bytes, main.o(i.main))
+<P><STRONG><a name="[21]"></a>main</STRONG> (Thumb, 108 bytes, Stack size 0 bytes, main.o(i.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 240<LI>Call Chain = main &rArr; SystemClock_Config &rArr; HAL_RCC_ClockConfig &rArr; HAL_RCC_GetSysClockFreq &rArr; __aeabi_uldivmod &rArr; __aeabi_llsl
 </UL>
 <BR>[Calls]<UL><LI><a href="#[78]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_USART2_UART_Init

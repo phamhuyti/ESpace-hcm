@@ -391,9 +391,6 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>::CMSIS</GroupName>
-        </Group>
-        <Group>
           <GroupName>Application/User</GroupName>
           <Files>
             <File>
@@ -552,6 +549,9 @@
               <FilePath>../Src/system_stm32f0xx.c</FilePath>
             </File>
           </Files>
+        </Group>
+        <Group>
+          <GroupName>::CMSIS</GroupName>
         </Group>
       </Groups>
     </Target>
