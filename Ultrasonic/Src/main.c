@@ -9,20 +9,18 @@
   * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
+  * This software component is licensed by ST under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
   *
   ******************************************************************************
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os.h"
 #include "adc.h"
 #include "can.h"
-#include "dma.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -34,22 +32,21 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
 #define DEVICE_USTICKER 1
-#define delay(...) osDelay(__VA_ARGS__)
+#define delay(...) HAL_Delay(__VA_ARGS__)
 #define GREEN_LED "B7"
 #define RED_LED "B6"
 #define BLUE_LED "B5"
 #define BUTTON1 "A1"
-#define RS485_EN "A8"
 #define HIGH GPIO_PIN_SET
 #define LOW GPIO_PIN_RESET
 #define TRUE 1
 #define FALSE 0
+#define TIMEOUT_UART1 100
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -60,21 +57,21 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint32_t tick_micros = 0; // micros value
-uint8_t Rx_Buffer1[128];  // Uart RX Message 1
-uint8_t Rx_Buffer2[28];   // Uart RX Message 2
+uint32_t tick_micros = 0;                                    // micros value
+char Rx_indx1, Rx_data1[2], Rx_Buffer1[100], Transfer_cplt1; // Uart RX Message 1
+char Rx_indx2, Rx_data2[2], Rx_Buffer2[100], Transfer_cplt2; // Uart RX Message 2
+uint32_t last_uart1 = 0, last_uart2 = 0;                     // Last time recieve uart
 extern CAN_HandleTypeDef hcan;
 CAN_RxHeaderTypeDef rxHeader;                //CAN Bus Receive Header
 CAN_TxHeaderTypeDef txHeader;                //CAN Bus Transmit Header
 uint8_t canRX[8] = {0, 1, 2, 3, 4, 5, 6, 7}; //CAN Bus Receive Buffer
 CAN_FilterTypeDef canfil;                    //CAN Bus Filter
 uint32_t canMailbox;                         //CAN Bus Mail box variable
-uint8_t isCanAvailable = 0;
+char isCanAvailable = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -82,21 +79,28 @@ void MX_FREERTOS_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 // Setup GPIO
-void digitalWrite(char LedPin[3], GPIO_PinState Value)
+void digitalWrite(char LedPin[3], int Value)
 {
-  HAL_GPIO_WritePin(((LedPin[0] == 'A') ? GPIOA : GPIOB), (uint16_t)(1 << (LedPin[1]) - 48), Value);
+  if (LedPin[0] == 'A')
+  {
+    HAL_GPIO_WritePin(GPIOA, LedPin[1] - 32, Value);
+  }
+  if (LedPin[0] == 'B')
+  {
+    HAL_GPIO_WritePin(GPIOB, LedPin[1] - 32, Value);
+  }
 }
 // Read GPIO State
-GPIO_PinState digitalRead(char pin[2])
+char digitalRead(char pin[3])
 {
+  if (pin[0] == 'A')
+  {
+    return HAL_GPIO_ReadPin(GPIOA, pin[1] - 32);
+  }
   if (pin[0] == 'B')
-    HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  GPIO_InitStruct.Pin = (uint16_t)(1 << (pin[1]) - 48);
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(((pin[0] == 'A') ? GPIOA : GPIOB), &GPIO_InitStruct);
-  return HAL_GPIO_ReadPin(((pin[0] == 'A') ? GPIOA : GPIOB), (uint16_t)(1 << (pin[1]) - 48));
+  {
+    return HAL_GPIO_ReadPin(GPIOB, pin[1] - 32);
+  }
 }
 // Set PWM 0 - 100
 void analogWrite(uint8_t pwm)
@@ -116,10 +120,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
     tick_micros++;
   }
-  if (htim->Instance == TIM17)
-  {
-    HAL_IncTick();
-  }
 }
 // Return micros from chip start
 uint32_t micros()
@@ -132,27 +132,78 @@ uint32_t millis()
   return HAL_GetTick();
 }
 // Write Serial port
-void serial_write(int port, uint8_t *text)
+void serial_write(int port, char *text)
 {
   if (port == 1)
   {
-    HAL_UART_Transmit_DMA(&huart1, text, (uint16_t)(strlen(text)));
+    HAL_UART_Transmit(&huart1, text, (uint16_t)strlen(text), 1000);
   }
   else
   {
-    HAL_UART_Transmit_DMA(&huart2, text, (uint16_t)strlen(text));
+    HAL_UART_Transmit(&huart2, text, (uint16_t)strlen(text), 1000);
+  }
+}
+// Uart Recive Interrupt
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  uint8_t i;
+
+  // Uart 1
+  if (huart->Instance == USART1) //current UART1
+  {
+    if (Rx_indx1 == 0)
+    {
+      for (i = 0; i < 100; i++)
+        Rx_Buffer1[i] = 0;
+    } //clear Rx_Buffer before receiving new data
+
+    //if (Rx_data[0]!=13) //if received data different from ascii 13 (enter)
+    if (millis() - last_uart1 < TIMEOUT_UART1 || Rx_indx1 == 0)
+    {
+      Rx_Buffer1[Rx_indx1++] = Rx_data1[0]; //add data to Rx_Buffer
+    }
+    else //if received data = 13
+    {
+      Rx_indx1 = 0;
+      Transfer_cplt1 = 1; //transfer complete, data is ready to read
+    }
+    last_uart1 = millis();
+    HAL_UART_Receive_IT(&huart1, Rx_data1, 1); //activate UART receive interrupt every time
+  }
+
+  // Uart 2
+  if (huart->Instance == USART2) //current UART1
+  {
+    if (Rx_indx2 == 0)
+    {
+      for (i = 0; i < 100; i++)
+        Rx_Buffer2[i] = 0;
+    } //clear Rx_Buffer before receiving new data
+
+    //if (Rx_data[0]!=13) //if received data different from ascii 13 (enter)
+    if (millis() - last_uart2 < TIMEOUT_UART1 || Rx_indx2 == 0)
+    {
+      Rx_Buffer2[Rx_indx2++] = Rx_data2[0]; //add data to Rx_Buffer
+    }
+    else //if received data = 13
+    {
+      Rx_indx2 = 0;
+      Transfer_cplt2 = 1; //transfer complete, data is ready to read
+    }
+    last_uart2 = millis();
+    HAL_UART_Receive_IT(&huart2, Rx_data2, 1); //activate UART receive interrupt every time
   }
 }
 // Read Serial data buffer
-void serial_Read(int uart)
+char *serial_Read(int uart)
 {
   if (uart == 1)
   {
-    HAL_UART_Receive_DMA(&huart1, Rx_Buffer1, 3);
+    return Rx_Buffer1;
   }
   else
   {
-    HAL_UART_Receive_DMA(&huart2, Rx_Buffer2, 3);
+    return Rx_Buffer2;
   }
 }
 // Check data ready to read
@@ -160,8 +211,9 @@ int serial_Available(int uart)
 {
   if (uart == 1)
   {
-    if (huart1.RxState == HAL_UART_STATE_READY)
+    if (Transfer_cplt1 > 0)
     {
+      Transfer_cplt1 = 0;
       return 1;
     }
     else
@@ -171,8 +223,9 @@ int serial_Available(int uart)
   }
   else
   {
-    if (huart2.RxState == HAL_UART_STATE_READY)
+    if (Transfer_cplt2 > 0)
     {
+      Transfer_cplt2 = 0;
       return 1;
     }
     else
@@ -216,7 +269,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan1)
   isCanAvailable = 1;
 }
 // Check CAN available
-uint8_t can_Available()
+char can_Available()
 {
   return isCanAvailable;
 }
@@ -250,7 +303,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
   MX_ADC_Init();
   MX_CAN_Init();
   MX_TIM3_Init();
@@ -258,20 +310,22 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM14_Init();
   /* USER CODE BEGIN 2 */
+
   /* USER CODE END 2 */
-
-  /* Call init function for freertos objects (in freertos.c) */
-  MX_FREERTOS_Init();
-  /* Start scheduler */
-  osKernelStart();
-
-  /* We should never get here as control is now taken by the scheduler */
+	HAL_UART_Receive_IT(&huart2, Rx_data2, 1);
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
-
+    HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8,GPIO_PIN_RESET);
+    delay(10);
+    serial_write(2, "123");
+    HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8,GPIO_PIN_SET);
+	    HAL_UART_Receive_IT(&huart2, Rx_data2, 1);
+		delay(10);
+      serial_Read(2);
+    delay(100);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -324,28 +378,6 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
-
-/**
-  * @brief  Period elapsed callback in non blocking mode
-  * @note   This function is called  when TIM17 interrupt took place, inside
-  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
-  * a global variable "uwTick" used as application time base.
-  * @param  htim : TIM handle
-  * @retval None
-  */
-// void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-// {
-//   /* USER CODE BEGIN Callback 0 */
-
-//   /* USER CODE END Callback 0 */
-//   if (htim->Instance == TIM17)
-//   {
-//     HAL_IncTick();
-//   }
-//   /* USER CODE BEGIN Callback 1 */
-
-//   /* USER CODE END Callback 1 */
-// }
 
 /**
   * @brief  This function is executed in case of error occurrence.
