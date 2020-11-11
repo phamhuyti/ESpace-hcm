@@ -4,6 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
+                "C:/GitHub/ESpace-hcm/Ultrasonic/",
                 "C:/Keil_v5/ARM/ARMCLANG/include/**"
             ],
             "defines": [
