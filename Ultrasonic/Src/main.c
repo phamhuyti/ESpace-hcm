@@ -322,7 +322,6 @@ int main(void)
     delay(10);
     serial_write(2, "123");
     HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8,GPIO_PIN_SET);
-	    HAL_UART_Receive_IT(&huart2, Rx_data2, 1);
 		delay(10);
       serial_Read(2);
     delay(100);
