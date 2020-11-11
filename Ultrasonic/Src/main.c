@@ -45,6 +45,7 @@
 #define RED_LED "B6"
 #define BLUE_LED "B5"
 #define BUTTON1 "A1"
+#define RS485_EN "A8"
 #define HIGH GPIO_PIN_SET
 #define LOW GPIO_PIN_RESET
 #define TRUE 1
@@ -88,6 +89,13 @@ void digitalWrite(char LedPin[3], GPIO_PinState Value)
 // Read GPIO State
 GPIO_PinState digitalRead(char pin[2])
 {
+  if (pin[0] == 'B')
+    HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = (uint16_t)(1 << (pin[1]) - 48);
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(((pin[0] == 'A') ? GPIOA : GPIOB), &GPIO_InitStruct);
   return HAL_GPIO_ReadPin(((pin[0] == 'A') ? GPIOA : GPIOB), (uint16_t)(1 << (pin[1]) - 48));
 }
 // Set PWM 0 - 100
@@ -250,9 +258,6 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM14_Init();
   /* USER CODE BEGIN 2 */
-  serial_Read(1);
-  serial_Read(2);
-  serial_write(1, (uint8_t*)"HELLO!!!");
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */

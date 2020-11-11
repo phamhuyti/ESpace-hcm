@@ -51,6 +51,7 @@
 osThreadId SerialHandle;
 osThreadId LEDHandle;
 extern uint8_t Rx_Buffer1[128];
+extern uint8_t Rx_Buffer2[128];
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 
@@ -63,8 +64,9 @@ extern void serial_Read(int uart);
 extern int serial_Available(int uart);
 extern void serial_write(int port, uint8_t *text);
 extern void analogWrite(uint8_t pwm);
+extern GPIO_PinState digitalRead(char pin[2]);
+extern void digitalWrite(char LedPin[3], GPIO_PinState Value);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
-
 /* GetIdleTaskMemory prototype (linked to static allocation support) */
 void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize);
 
@@ -114,7 +116,7 @@ void MX_FREERTOS_Init(void)
   SerialHandle = osThreadCreate(osThread(Serial), NULL);
 
   /* definition and creation of LED */
-  osThreadDef(LED, StartLED, osPriorityIdle, 0, 128);
+  osThreadDef(LED, StartLED, osPriorityRealtime, 0, 128);
   LEDHandle = osThreadCreate(osThread(LED), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -133,18 +135,33 @@ void StartSerial(void const *argument)
 {
   /* USER CODE BEGIN StartSerial */
   /* Infinite loop */
+  serial_write(2, (uint8_t *)"HELLO UART 111112!!!");
   for (;;)
   {
-    if (serial_Available(1))
-    {
-      serial_write(1, (uint8_t *)"HELLO!!!");
-      serial_Read(1);
-      for (uint8_t i = 0; i < 128; i++)
-      {
-        Rx_Buffer1[i] = 0;
-      }
-    }
-    osDelay(1);
+    digitalWrite("A8",GPIO_PIN_RESET);
+    serial_write(2, (uint8_t *)"123");
+    osDelay(1000);
+    digitalWrite("A8",GPIO_PIN_SET);
+		serial_Read(2);
+    // if (serial_Available(2))
+    // {
+    //   serial_write(2, (uint8_t *)"HELLO UART 2!!!");
+    //   serial_Read(2);
+    //   for (uint8_t i = 0; i < 128; i++)
+    //   {
+    //     Rx_Buffer1[i] = 0;
+    //   }
+    // }
+    // if (serial_Available(1))
+    // {
+    //   serial_write(1, (uint8_t *)"HELLO UART 1!!!");
+    //   serial_Read(1);
+    //   for (uint8_t i = 0; i < 128; i++)
+    //   {
+    //     Rx_Buffer1[i] = 0;
+    //   }
+    // }
+    // osDelay(1);
   }
   /* USER CODE END StartSerial */
 }
@@ -156,27 +173,23 @@ void StartSerial(void const *argument)
 * @retval None
 */
 /* USER CODE END Header_StartLED */
+int a;
 void StartLED(void const *argument)
 {
   /* USER CODE BEGIN StartLED */
   /* Infinite loop */
-  uint8_t a = 0;
   for (;;)
   {
-    for (uint8_t i = 0; i < 101; i++)
-    {
-      analogWrite(i);
-      osDelay(10);
-    }
-    for (uint8_t i = 101; i > 0; i--)
-    {
-      analogWrite(i);
-      osDelay(10);
-    }
+    //analogWrite(50);
+    HAL_GPIO_TogglePin(BLUE_LED_GPIO_Port, BLUE_LED_Pin);
+    osDelay(1000);
+    HAL_GPIO_TogglePin(BLUE_LED_GPIO_Port, GREEN_LED_Pin);
+    osDelay(1000);
+    HAL_GPIO_TogglePin(BLUE_LED_GPIO_Port, RED_LED_Pin);
+    osDelay(1000);
   }
   /* USER CODE END StartLED */
 }
-
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 
