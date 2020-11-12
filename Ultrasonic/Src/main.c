@@ -154,6 +154,8 @@ void serial_Read(uint8_t uart, uint8_t size)
   {
     HAL_UART_Receive_DMA(&huart2, Rx_Buffer2, size);
   }
+  if(huart2.ErrorCode != 0) HAL_UART_AbortReceive_IT(&huart2);
+  if(huart1.ErrorCode != 0) HAL_UART_AbortReceive_IT(&huart1);
 }
 // Check data ready to read
 int serial_Available(int uart)

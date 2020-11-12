@@ -135,35 +135,18 @@ void StartSerial(void const *argument)
 {
   /* USER CODE BEGIN StartSerial */
   /* Infinite loop */
-  serial_write(2, (uint8_t *)"HELLO UART 111112!!!");
-  osDelay(1000);
   digitalWrite("A8", GPIO_PIN_RESET);
+  osDelay(100);
+  serial_write(2, (uint8_t *)"HELLO UART 111112!!!");
+  osDelay(100);
   serial_write(2, (uint8_t *)"123");
-  osDelay(1000);
+  osDelay(100);
+  digitalWrite("A8", GPIO_PIN_SET);
+  osDelay(100);
   for (;;)
   {
-    digitalWrite("A8", GPIO_PIN_SET);
-    serial_Read(2,9);
-    osDelay(1000);
-    // if (serial_Available(2))
-    // {
-    //   serial_write(2, (uint8_t *)"HELLO UART 2!!!");
-    //   serial_Read(2);
-    //   for (uint8_t i = 0; i < 128; i++)
-    //   {
-    //     Rx_Buffer1[i] = 0;
-    //   }
-    // }
-    // if (serial_Available(1))
-    // {
-    //   serial_write(1, (uint8_t *)"HELLO UART 1!!!");
-    //   serial_Read(1);
-    //   for (uint8_t i = 0; i < 128; i++)
-    //   {
-    //     Rx_Buffer1[i] = 0;
-    //   }
-    // }
-    // osDelay(1);
+    serial_Read(2, 9);
+    osDelay(100);
   }
   /* USER CODE END StartSerial */
 }
