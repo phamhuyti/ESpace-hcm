@@ -135,18 +135,19 @@ void StartSerial(void const *argument)
 {
   /* USER CODE BEGIN StartSerial */
   /* Infinite loop */
-  digitalWrite("A8", GPIO_PIN_RESET);
-  osDelay(100);
-  serial_write(2, (uint8_t *)"HELLO UART 111112!!!");
-  osDelay(100);
-  serial_write(2, (uint8_t *)"123");
-  osDelay(100);
-  digitalWrite("A8", GPIO_PIN_SET);
-  osDelay(100);
+  // digitalWrite("A8", GPIO_PIN_RESET);
+  // osDelay(100);
+  // serial_write(2, (uint8_t *)"HELLO UART 111112!!!");
+  // osDelay(100);
+  // serial_write(2, (uint8_t *)"123");
+  // osDelay(100);
+  // digitalWrite("A8", GPIO_PIN_SET);
+  // osDelay(100);
   for (;;)
   {
-    serial_Read(2, 9);
-    osDelay(100);
+    // serial_Read(2, 9);
+    // osDelay(100);
+    delay(1);
   }
   /* USER CODE END StartSerial */
 }
@@ -166,11 +167,11 @@ void StartLED(void const *argument)
   {
     //analogWrite(50);
     HAL_GPIO_TogglePin(BLUE_LED_GPIO_Port, BLUE_LED_Pin);
-    osDelay(1000);
+    osDelay(100);
     HAL_GPIO_TogglePin(BLUE_LED_GPIO_Port, GREEN_LED_Pin);
-    osDelay(1000);
+    osDelay(100);
     HAL_GPIO_TogglePin(BLUE_LED_GPIO_Port, RED_LED_Pin);
-    osDelay(1000);
+    osDelay(100);
   }
   /* USER CODE END StartLED */
 }
