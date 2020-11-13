@@ -24,46 +24,41 @@
 #define __MAIN_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal.h"
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
+  /* Private includes ----------------------------------------------------------*/
+  /* USER CODE BEGIN Includes */
 
-/* USER CODE END Includes */
+  /* USER CODE END Includes */
 
-/* Exported types ------------------------------------------------------------*/
-/* USER CODE BEGIN ET */
+  /* Exported types ------------------------------------------------------------*/
+  /* USER CODE BEGIN ET */
 
-/* USER CODE END ET */
+  /* USER CODE END ET */
 
-/* Exported constants --------------------------------------------------------*/
-/* USER CODE BEGIN EC */
+  /* Exported constants --------------------------------------------------------*/
+  /* USER CODE BEGIN EC */
 
-/* USER CODE END EC */
+  /* USER CODE END EC */
 
-/* Exported macro ------------------------------------------------------------*/
-/* USER CODE BEGIN EM */
+  /* Exported macro ------------------------------------------------------------*/
+  /* USER CODE BEGIN EM */
 
-/* USER CODE END EM */
+  /* USER CODE END EM */
 
-/* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
+  /* Exported functions prototypes ---------------------------------------------*/
+  void Error_Handler(void);
 
-/* USER CODE BEGIN EFP */
-extern void Pwm_Start(void);
-extern void Pwm_Stop(void);
-extern uint64_t micros(void);
-extern GPIO_PinState digitalRead(char pin[2]);
-extern void digitalWrite(char LedPin[3], GPIO_PinState Value);
-extern void serial_write(int port, uint8_t *text);
-extern void serial_Read(uint8_t uart, uint8_t size);
-extern uint8_t serial_Available(int uart);
-extern void delay_us(uint64_t time);
-extern float map(float x, float in_min, float in_max, float out_min, float out_max);
+  /* USER CODE BEGIN EFP */
+  extern uint8_t Rx_Buffer1[128]; // Uart RX Message 1
+  extern uint8_t Rx_Buffer2[128]; // Uart RX Message 2
+  extern uint32_t Adc_buffer[3];
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -80,7 +75,6 @@ extern float map(float x, float in_min, float in_max, float out_min, float out_m
 #define RED_LED_Pin GPIO_PIN_7
 #define RED_LED_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-#define DEVICE_USTICKER 1
 #define delay(...) osDelay(__VA_ARGS__)
 #define GREEN_LED "B7"
 #define RED_LED "B6"
@@ -88,14 +82,14 @@ extern float map(float x, float in_min, float in_max, float out_min, float out_m
 #define BUTTON1 "A1"
 #define BUTTON2 "B0"
 #define ULTRASONIC_IN "A7"
-#define DATARX "A8"
+#define DATARX_PIN "A8"
 #define HIGH GPIO_PIN_SET
 #define LOW GPIO_PIN_RESET
 #define TRUE 1
 #define FALSE 0
-extern int strlen(uint8_t *);
+  extern int strlen(uint8_t *);
 
-/* USER CODE END Private defines */
+  /* USER CODE END Private defines */
 
 #ifdef __cplusplus
 }

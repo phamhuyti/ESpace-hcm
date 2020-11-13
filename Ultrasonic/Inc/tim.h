@@ -20,31 +20,37 @@
 #ifndef __tim_H
 #define __tim_H
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+{
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-/* USER CODE BEGIN Includes */
+  /* USER CODE BEGIN Includes */
 
-/* USER CODE END Includes */
+  /* USER CODE END Includes */
 
-extern TIM_HandleTypeDef htim3;
-extern TIM_HandleTypeDef htim17;
+  extern TIM_HandleTypeDef htim3;
+  extern TIM_HandleTypeDef htim17;
 
-/* USER CODE BEGIN Private defines */
+  /* USER CODE BEGIN Private defines */
 
-/* USER CODE END Private defines */
+  /* USER CODE END Private defines */
 
-void MX_TIM3_Init(void);
-void MX_TIM17_Init(void);
+  void MX_TIM3_Init(void);
+  void MX_TIM17_Init(void);
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+  void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
-/* USER CODE BEGIN Prototypes */
-
-/* USER CODE END Prototypes */
+  /* USER CODE BEGIN Prototypes */
+  void Pwm_Start(void);
+  void Pwm_Stop(void);
+  void SetDutyCycle_PWM(uint8_t pwm);
+  uint64_t micros(void);
+  void delay_us(uint64_t time);
+  uint32_t millis(void);
+  /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
 }

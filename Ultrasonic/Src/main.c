@@ -50,16 +50,10 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint64_t tick_milis = 0; // micros value
 uint8_t Rx_Buffer1[128]; // Uart RX Message 1
-uint8_t Rx_Buffer2[28];  // Uart RX Message 2
-extern CAN_HandleTypeDef hcan;
-CAN_RxHeaderTypeDef rxHeader;                //CAN Bus Receive Header
-CAN_TxHeaderTypeDef txHeader;                //CAN Bus Transmit Header
-uint8_t canRX[8] = {0, 1, 2, 3, 4, 5, 6, 7}; //CAN Bus Receive Buffer
-CAN_FilterTypeDef canfil;                    //CAN Bus Filter
-uint32_t canMailbox;                         //CAN Bus Mail box variable
-uint8_t isCanAvailable = 0;
+uint8_t Rx_Buffer2[128]; // Uart RX Message 2
+uint32_t Adc_buffer[3];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -71,162 +65,7 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-//Map value
-float map(float x, float in_min, float in_max, float out_min, float out_max)
-{
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
-// Setup GPIO
-void digitalWrite(char LedPin[3], GPIO_PinState Value)
-{
-  HAL_GPIO_WritePin(((LedPin[0] == 'A') ? GPIOA : GPIOB), (uint16_t)(1 << (LedPin[1]) - 48), Value);
-}
-// Read GPIO State
-GPIO_PinState digitalRead(char pin[2])
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  GPIO_InitStruct.Pin = (uint16_t)(1 << (pin[1]) - 48);
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(((pin[0] == 'A') ? GPIOA : GPIOB), &GPIO_InitStruct);
-  return HAL_GPIO_ReadPin(((pin[0] == 'A') ? GPIOA : GPIOB), (uint16_t)(1 << (pin[1]) - 48));
-}
-// Start PWM
-void Pwm_Start(void)
-{
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-}
 
-// Stop PWM
-void Pwm_Stop(void)
-{
-  HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
-}
-// Set PWM 0 - 100
-void SetDutyCycle_PWM(uint8_t pwm)
-{
-  // htim3.Instance->CCR1 = 50;
-  TIM_OC_InitTypeDef sConfigOC;
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = pwm;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  HAL_TIM_MspPostInit(&htim3);
-  // HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-}
-// Return micros from chip start
-uint64_t micros(void)
-{
-  return (tick_milis * 1000 + __HAL_TIM_GET_COUNTER(&htim17));
-}
-//Delay time microsecond
-void delay_us(uint64_t time)
-{
-  uint64_t counter = time + micros();
-  while (counter > micros())
-    ;
-}
-// Return millis from chip start
-uint32_t millis(void)
-{
-  return HAL_GetTick();
-}
-// Write Serial port
-void serial_write(int port, uint8_t *text)
-{
-  if (port == 1)
-  {
-    HAL_UART_Transmit_DMA(&huart1, text, (uint16_t)(strlen(text))); //check strlen variables main.h
-  }
-  else
-  {
-    digitalWrite(DATARX, LOW);
-    HAL_UART_Transmit_DMA(&huart2, text, (uint16_t)strlen(text)); //check strlen variables main.h
-  }
-}
-// Read Serial data buffer
-void serial_Read(uint8_t uart, uint8_t size)
-{
-  if (uart == 1)
-  {
-    HAL_UART_Receive_DMA(&huart1, Rx_Buffer1, size);
-  }
-  else
-  {
-    HAL_UART_AbortReceive(&huart2);
-    digitalWrite(DATARX, HIGH);
-    HAL_UART_Receive_DMA(&huart2, Rx_Buffer2, size);
-  }
-}
-// Check data ready to read
-uint8_t serial_Available(int uart)
-{
-  if (uart == 1)
-  {
-    if (hdma_usart1_rx.Lock == HAL_UNLOCKED)
-    {
-      return 1;
-    }
-    else
-    {
-      return 0;
-    }
-  }
-  else
-  {
-    if (hdma_usart2_rx.Lock == HAL_UNLOCKED)
-    {
-      return 1;
-    }
-    else
-    {
-      return 0;
-    }
-  }
-}
-// CAN filter
-void can_init()
-{
-  canfil.FilterBank = 0;
-  canfil.FilterMode = CAN_FILTERMODE_IDMASK;
-  canfil.FilterFIFOAssignment = CAN_RX_FIFO0;
-  canfil.FilterIdHigh = 0;
-  canfil.FilterIdLow = 0;
-  canfil.FilterMaskIdHigh = 0;
-  canfil.FilterMaskIdLow = 0;
-  canfil.FilterScale = CAN_FILTERSCALE_32BIT;
-  canfil.FilterActivation = ENABLE;
-  canfil.SlaveStartFilterBank = 14;
-  HAL_CAN_ConfigFilter(&hcan, &canfil);                             //Initialize CAN Filter
-  HAL_CAN_Start(&hcan);                                             //Initialize CAN Bus
-  HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING); // Initialize CAN Bus Rx Interrupt
-}
-// Send CAN message
-void can_send(uint32_t id, uint8_t *data, uint32_t len)
-{
-  CAN_TxHeaderTypeDef sendmssg;
-  sendmssg.DLC = len;
-  sendmssg.IDE = CAN_ID_STD;
-  sendmssg.RTR = CAN_RTR_DATA;
-  sendmssg.StdId = id;
-  sendmssg.TransmitGlobalTime = DISABLE;
-  HAL_CAN_AddTxMessage(&hcan, &sendmssg, data, &canMailbox); // Send Message
-}
-// Recieve CAN message
-void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan1)
-{
-  HAL_CAN_GetRxMessage(hcan1, CAN_RX_FIFO0, &rxHeader, canRX); //Receive CAN bus message to canRX buffer
-  isCanAvailable = 1;
-}
-// Check CAN available
-uint8_t can_Available()
-{
-  return isCanAvailable;
-}
 /* USER CODE END 0 */
 
 /**
@@ -266,6 +105,7 @@ int main(void)
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim17);
+  HAL_ADC_Start_DMA(&hadc, Adc_buffer, 3);
   // SetDutyCycle_PWM(100);
   /* USER CODE END 2 */
 
@@ -333,31 +173,6 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
-
-/**
-  * @brief  Period elapsed callback in non blocking mode
-  * @note   This function is called  when TIM1 interrupt took place, inside
-  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
-  * a global variable "uwTick" used as application time base.
-  * @param  htim : TIM handle
-  * @retval None
-  */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  /* USER CODE BEGIN Callback 0 */
-
-  /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM1)
-  {
-    HAL_IncTick();
-  }
-  /* USER CODE BEGIN Callback 1 */
-  if (htim->Instance == TIM17) //check if the interrupt comes from TIM17 for 1000 micros
-  {
-    tick_milis++;
-  }
-  /* USER CODE END Callback 1 */
-}
 
 /**
   * @brief  This function is executed in case of error occurrence.

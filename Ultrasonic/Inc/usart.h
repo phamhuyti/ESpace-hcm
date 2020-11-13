@@ -20,33 +20,39 @@
 #ifndef __usart_H
 #define __usart_H
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+{
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-/* USER CODE BEGIN Includes */
+  /* USER CODE BEGIN Includes */
 
-/* USER CODE END Includes */
+  /* USER CODE END Includes */
 
-extern UART_HandleTypeDef huart1;
-extern UART_HandleTypeDef huart2;
+  extern UART_HandleTypeDef huart1;
+  extern UART_HandleTypeDef huart2;
 
-/* USER CODE BEGIN Private defines */
+  /* USER CODE BEGIN Private defines */
 
-/* USER CODE END Private defines */
+  /* USER CODE END Private defines */
 
-void MX_USART1_UART_Init(void);
-void MX_USART2_UART_Init(void);
+  void MX_USART1_UART_Init(void);
+  void MX_USART2_UART_Init(void);
 
-/* USER CODE BEGIN Prototypes */
+  /* USER CODE BEGIN Prototypes */
 
-extern DMA_HandleTypeDef hdma_usart1_rx;
-extern DMA_HandleTypeDef hdma_usart1_tx;
-extern DMA_HandleTypeDef hdma_usart2_rx;
-extern DMA_HandleTypeDef hdma_usart2_tx;
-/* USER CODE END Prototypes */
+  extern DMA_HandleTypeDef hdma_usart1_rx;
+  extern DMA_HandleTypeDef hdma_usart1_tx;
+  extern DMA_HandleTypeDef hdma_usart2_rx;
+  extern DMA_HandleTypeDef hdma_usart2_tx;
+  void serial_write(int port, uint8_t *text);
+  void serial_Read(uint8_t uart, uint8_t size);
+  uint8_t serial_Available(int uart);
+  extern void digitalWrite(char LedPin[3], GPIO_PinState Value);
+
+  /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
 }

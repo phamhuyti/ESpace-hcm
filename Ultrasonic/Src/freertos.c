@@ -46,7 +46,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-extern TIM_HandleTypeDef htim17;
 extern ADC_HandleTypeDef hadc;
 /* USER CODE END Variables */
 osThreadId Ultrasonic_Calculate_Handle;
@@ -64,8 +63,7 @@ extern void serial_write(int port, uint8_t *text);
 extern void serial_Read(uint8_t uart, uint8_t size);
 extern uint8_t serial_Available(int uart);
 extern void delay_us(uint64_t time);
-extern float map(float x, float in_min, float in_max, float out_min, float out_max);
-uint32_t buffer[3];
+float map(float x, float in_min, float in_max, float out_min, float out_max);
 float Temperature;
 float Temperature_Ext;
 uint64_t a = 0, b = 0, pre = 0;
@@ -130,8 +128,6 @@ void MX_FREERTOS_Init(void)
   LEDHandle = osThreadCreate(osThread(LED), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  // HAL_ADC_Start(&hadc);
-  HAL_ADC_Start_DMA(&hadc, buffer, 3);
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 }
@@ -161,12 +157,12 @@ void Ultrasonic_Calculate(void const *argument)
       i++;
       delay_us(1);
       // HAL_ADC_PollForConversion(&hadc,1);
-      // buffer[0] = HAL_ADC_GetValue(&hadc);
+      // Adc_buffer[0] = HAL_ADC_GetValue(&hadc);
       // HAL_ADC_PollForConversion(&hadc,1);
-      // buffer[1] = HAL_ADC_GetValue(&hadc);
+      // Adc_buffer[1] = HAL_ADC_GetValue(&hadc);
       // HAL_ADC_PollForConversion(&hadc,1);
-      // buffer[2] = HAL_ADC_GetValue(&hadc);
-    } while (buffer[1] < 3500 && i < 3000);
+      // Adc_buffer[2] = HAL_ADC_GetValue(&hadc);
+    } while (Adc_buffer[1] < 3500 && i < 3000);
     if (i < 3000)
     {
       // b = micros();
@@ -174,7 +170,7 @@ void Ultrasonic_Calculate(void const *argument)
       s = (float)(a / 2000.0) * 0.320;
     }
     else
-      s = 9999999;
+      s = 99999999;
     delay(100);
   }
   /* USER CODE END StartSerial */
@@ -194,8 +190,8 @@ void StartLED(void const *argument)
   for (;;)
   {
     float vsense = 3.3 / 4095;
-    Temperature = ((buffer[2] * vsense - 1.43) / 4.3) + 25;
-    float tem = buffer[0] * 3.3 / 4095;
+    Temperature = ((Adc_buffer[2] * vsense - 1.43) / 4.3) + 25;
+    float tem = Adc_buffer[0] * 3.3 / 4095;
     Temperature_Ext = map(tem, 1.6, 0, -30, 125);
   }
   /* USER CODE END StartLED */
@@ -204,24 +200,10 @@ void StartLED(void const *argument)
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 
-// Called when first half of buffer is filled
-// void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc)
-// {
-//   HAL_GPIO_WritePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin, GPIO_PIN_SET);
-// }
-
-// // Called when buffer is completely filled
-// void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
-// {
-//   HAL_GPIO_WritePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin, GPIO_PIN_RESET);
-//   for (uint8_t i = 0; i < 3; i++)
-//   {
-//     adcBuffer[i]=buffer[i];
-//   }
-//   float vsense = 3.3/4095;
-//   Temperature = ((buffer[2]*vsense-1.43)/4.3)+25;
-//   Temperature_Ext = (float)buffer[0]*3.3/4095;
-// }
+float map(float x, float in_min, float in_max, float out_min, float out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 
 /* USER CODE END Application */
 
