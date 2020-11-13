@@ -141,7 +141,7 @@ void serial_write(int port, uint8_t *text)
   else
   {
     digitalWrite(DATARX, LOW);
-    HAL_UART_Transmit_DMA(&huart2, text, (uint16_t)strlen(text));
+    HAL_UART_Transmit_DMA(&huart2, text, (uint16_t)strlen(text)); //check strlen variables main.h
   }
 }
 // Read Serial data buffer
