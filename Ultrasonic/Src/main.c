@@ -39,17 +39,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define DEVICE_USTICKER 1
-#define delay(...) osDelay(__VA_ARGS__)
-#define GREEN_LED "B7"
-#define RED_LED "B6"
-#define BLUE_LED "B5"
-#define BUTTON1 "A1"
-#define RS485_EN "A8"
-#define HIGH GPIO_PIN_SET
-#define LOW GPIO_PIN_RESET
-#define TRUE 1
-#define FALSE 0
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -60,9 +50,9 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint32_t tick_micros = 0; // micros value
-uint8_t Rx_Buffer1[128];  // Uart RX Message 1
-uint8_t Rx_Buffer2[28];   // Uart RX Message 2
+uint64_t tick_milis = 0; // micros value
+uint8_t Rx_Buffer1[128]; // Uart RX Message 1
+uint8_t Rx_Buffer2[28];  // Uart RX Message 2
 extern CAN_HandleTypeDef hcan;
 CAN_RxHeaderTypeDef rxHeader;                //CAN Bus Receive Header
 CAN_TxHeaderTypeDef txHeader;                //CAN Bus Transmit Header
@@ -70,6 +60,8 @@ uint8_t canRX[8] = {0, 1, 2, 3, 4, 5, 6, 7}; //CAN Bus Receive Buffer
 CAN_FilterTypeDef canfil;                    //CAN Bus Filter
 uint32_t canMailbox;                         //CAN Bus Mail box variable
 uint8_t isCanAvailable = 0;
+uint8_t stt = 0;
+uint64_t counter = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -98,36 +90,45 @@ GPIO_PinState digitalRead(char pin[2])
   HAL_GPIO_Init(((pin[0] == 'A') ? GPIOA : GPIOB), &GPIO_InitStruct);
   return HAL_GPIO_ReadPin(((pin[0] == 'A') ? GPIOA : GPIOB), (uint16_t)(1 << (pin[1]) - 48));
 }
+// Start PWM
+void Pwm_Start(void)
+{
+  stt = 1;
+  htim3.Instance->CCR1 = 50;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+}
+
+// Stop PWM
+void Pwm_Stop(void)
+{
+  stt = 0;
+  HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+}
 // Set PWM 0 - 100
-void analogWrite(uint8_t pwm)
+void SetDutyCycle_PWM(uint8_t pwm)
 {
   TIM_OC_InitTypeDef sConfigOC;
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = pwm * 12;
+  sConfigOC.Pulse = pwm;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-}
-// Timer Interrupt
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  if (htim->Instance == TIM14) //check if the interrupt comes from TIM1 for 1 micros
-  {
-    tick_micros++;
-  }
-  if (htim->Instance == TIM17)
-  {
-    HAL_IncTick();
-  }
+  // HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 }
 // Return micros from chip start
-uint32_t micros()
+uint64_t micros(void)
 {
-  return tick_micros;
+  return (tick_milis * 1000 + __HAL_TIM_GET_COUNTER(&htim17));
+}
+//Delay time microsecond
+void delay_us(uint64_t time)
+{
+  counter = time+ micros();
+  while (counter>micros())
+    ;
 }
 // Return millis from chip start
-uint32_t millis()
+uint32_t millis(void)
 {
   return HAL_GetTick();
 }
@@ -136,10 +137,11 @@ void serial_write(int port, uint8_t *text)
 {
   if (port == 1)
   {
-    HAL_UART_Transmit_DMA(&huart1, text, (uint16_t)(strlen(text)));
+    HAL_UART_Transmit_DMA(&huart1, text, (uint16_t)(strlen(text))); //check strlen variables main.h
   }
   else
   {
+    digitalWrite(DATARX, LOW);
     HAL_UART_Transmit_DMA(&huart2, text, (uint16_t)strlen(text));
   }
 }
@@ -152,17 +154,17 @@ void serial_Read(uint8_t uart, uint8_t size)
   }
   else
   {
+    HAL_UART_AbortReceive(&huart2);
+    digitalWrite(DATARX, HIGH);
     HAL_UART_Receive_DMA(&huart2, Rx_Buffer2, size);
   }
-  if(huart2.ErrorCode != 0) HAL_UART_AbortReceive_IT(&huart2);
-  if(huart1.ErrorCode != 0) HAL_UART_AbortReceive_IT(&huart1);
 }
 // Check data ready to read
-int serial_Available(int uart)
+uint8_t serial_Available(int uart)
 {
   if (uart == 1)
   {
-    if (huart1.RxState == HAL_UART_STATE_READY)
+    if (hdma_usart1_rx.Lock == HAL_UNLOCKED)
     {
       return 1;
     }
@@ -173,7 +175,7 @@ int serial_Available(int uart)
   }
   else
   {
-    if (huart2.RxState == HAL_UART_STATE_READY)
+    if (hdma_usart2_rx.Lock == HAL_UNLOCKED)
     {
       return 1;
     }
@@ -258,8 +260,10 @@ int main(void)
   MX_TIM3_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
-  MX_TIM14_Init();
+  MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_Base_Start_IT(&htim17);
+  // SetDutyCycle_PWM(100);
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -292,7 +296,7 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI14 | RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI14|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSI14State = RCC_HSI14_ON;
   RCC_OscInitStruct.HSI14CalibrationValue = 16;
@@ -306,7 +310,8 @@ void SystemClock_Config(void)
   }
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
@@ -329,25 +334,28 @@ void SystemClock_Config(void)
 
 /**
   * @brief  Period elapsed callback in non blocking mode
-  * @note   This function is called  when TIM17 interrupt took place, inside
+  * @note   This function is called  when TIM1 interrupt took place, inside
   * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
   * a global variable "uwTick" used as application time base.
   * @param  htim : TIM handle
   * @retval None
   */
-// void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-// {
-//   /* USER CODE BEGIN Callback 0 */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
 
-//   /* USER CODE END Callback 0 */
-//   if (htim->Instance == TIM17)
-//   {
-//     HAL_IncTick();
-//   }
-//   /* USER CODE BEGIN Callback 1 */
-
-//   /* USER CODE END Callback 1 */
-// }
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM1) {
+    HAL_IncTick();
+    if(counter>0) counter--;
+  }
+  /* USER CODE BEGIN Callback 1 */
+  if (htim->Instance == TIM17) //check if the interrupt comes from TIM17 for 1000 micros
+  {
+    tick_milis++;
+  }
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
@@ -361,7 +369,7 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef USE_FULL_ASSERT
+#ifdef  USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

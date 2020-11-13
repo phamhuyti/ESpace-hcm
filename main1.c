@@ -89,7 +89,7 @@ GPIO_PinState digitalRead(char pin[2])
   return HAL_GPIO_ReadPin(((pin[0] == 'A') ? GPIOA : GPIOB), (uint16_t)(1 << (pin[1]) - 48));
 }
 // Set PWM 0 - 100
-void analogWrite(uint8_t pwm)
+void SetDutyCycle_PWM(uint8_t pwm)
 {
   TIM_OC_InitTypeDef sConfigOC;
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
@@ -265,7 +265,7 @@ int main(void)
     }
     if (a > 100)
       a = 0;
-    analogWrite(a++);
+    SetDutyCycle_PWM(a++);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

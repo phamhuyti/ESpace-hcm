@@ -46,29 +46,42 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-
+extern TIM_HandleTypeDef htim17;
+extern ADC_HandleTypeDef hadc;
 /* USER CODE END Variables */
 osThreadId SerialHandle;
 osThreadId LEDHandle;
-extern uint8_t Rx_Buffer1[128];
-extern uint8_t Rx_Buffer2[128];
+
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 
-/* USER CODE END FunctionPrototypes */
-
-void StartSerial(void const *argument);
-void StartLED(void const *argument);
-
-extern void serial_Read(uint8_t uart, uint8_t size);
-extern int serial_Available(int uart);
-extern void serial_write(int port, uint8_t *text);
-extern void analogWrite(uint8_t pwm);
+extern void Pwm_Start(void);
+extern void Pwm_Stop(void);
+extern uint64_t micros(void);
 extern GPIO_PinState digitalRead(char pin[2]);
 extern void digitalWrite(char LedPin[3], GPIO_PinState Value);
+extern void serial_write(int port, uint8_t *text);
+extern void serial_Read(uint8_t uart, uint8_t size);
+extern uint8_t serial_Available(int uart);
+extern void delay_us(uint64_t time);
+uint32_t buffer[3];
+float Temperature;
+float Temperature_Ext;
+float map(float x, float in_min, float in_max, float out_min, float out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+uint64_t a = 0, b = 0, pre = 0;
+float s = 0;
+/* USER CODE END FunctionPrototypes */
+
+void StartSerial(void const * argument);
+void StartLED(void const * argument);
+
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
+
 /* GetIdleTaskMemory prototype (linked to static allocation support) */
-void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize);
+void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize );
 
 /* USER CODE BEGIN GET_IDLE_TASK_MEMORY */
 static StaticTask_t xIdleTaskTCBBuffer;
@@ -88,8 +101,7 @@ void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer, StackTyp
   * @param  None
   * @retval None
   */
-void MX_FREERTOS_Init(void)
-{
+void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
@@ -116,12 +128,14 @@ void MX_FREERTOS_Init(void)
   SerialHandle = osThreadCreate(osThread(Serial), NULL);
 
   /* definition and creation of LED */
-  osThreadDef(LED, StartLED, osPriorityRealtime, 0, 128);
+  osThreadDef(LED, StartLED, osPriorityIdle, 0, 128);
   LEDHandle = osThreadCreate(osThread(LED), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
+  HAL_ADC_Start(&hadc);
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
 }
 
 /* USER CODE BEGIN Header_StartSerial */
@@ -131,23 +145,35 @@ void MX_FREERTOS_Init(void)
   * @retval None
   */
 /* USER CODE END Header_StartSerial */
-void StartSerial(void const *argument)
+void StartSerial(void const * argument)
 {
   /* USER CODE BEGIN StartSerial */
   /* Infinite loop */
-  // digitalWrite("A8", GPIO_PIN_RESET);
-  // osDelay(100);
-  // serial_write(2, (uint8_t *)"HELLO UART 111112!!!");
-  // osDelay(100);
-  // serial_write(2, (uint8_t *)"123");
-  // osDelay(100);
-  // digitalWrite("A8", GPIO_PIN_SET);
-  // osDelay(100);
+  uint64_t i;
   for (;;)
   {
-    // serial_Read(2, 9);
-    // osDelay(100);
-    delay(1);
+    i=0;
+    pre = micros();
+    Pwm_Start();
+    delay_us(500);
+    Pwm_Stop();
+    delay_us(2500);
+    do{
+      i++;
+      HAL_ADC_PollForConversion(&hadc,1);
+      buffer[0] = HAL_ADC_GetValue(&hadc);
+      HAL_ADC_PollForConversion(&hadc,1);
+      buffer[1] = HAL_ADC_GetValue(&hadc);
+      HAL_ADC_PollForConversion(&hadc,1);
+      buffer[2] = HAL_ADC_GetValue(&hadc);
+    }while(buffer[1]<3500&&i<500);
+    if (i < 500)
+    {
+      // b = micros();
+      a = micros() - pre;
+      s = (float)(a/2000.0)*0.320;
+    }else s = 9999999;
+    delay(100);
   }
   /* USER CODE END StartSerial */
 }
@@ -159,24 +185,41 @@ void StartSerial(void const *argument)
 * @retval None
 */
 /* USER CODE END Header_StartLED */
-void StartLED(void const *argument)
+void StartLED(void const * argument)
 {
   /* USER CODE BEGIN StartLED */
   /* Infinite loop */
   for (;;)
   {
-    //analogWrite(50);
-    HAL_GPIO_TogglePin(BLUE_LED_GPIO_Port, BLUE_LED_Pin);
-    osDelay(100);
-    HAL_GPIO_TogglePin(BLUE_LED_GPIO_Port, GREEN_LED_Pin);
-    osDelay(100);
-    HAL_GPIO_TogglePin(BLUE_LED_GPIO_Port, RED_LED_Pin);
-    osDelay(100);
+    float vsense = 3.3 / 4095;
+    Temperature = ((buffer[2] * vsense - 1.43) / 4.3) + 25;
+    float tem = buffer[0] * 3.3 / 4095;
+    Temperature_Ext = map(tem, 1.6, 0, -30, 125);
   }
   /* USER CODE END StartLED */
 }
+
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
+
+// Called when first half of buffer is filled
+// void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc)
+// {
+//   HAL_GPIO_WritePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin, GPIO_PIN_SET);
+// }
+
+// // Called when buffer is completely filled
+// void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
+// {
+//   HAL_GPIO_WritePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin, GPIO_PIN_RESET);
+//   for (uint8_t i = 0; i < 3; i++)
+//   {
+//     adcBuffer[i]=buffer[i];
+//   }
+//   float vsense = 3.3/4095;
+//   Temperature = ((buffer[2]*vsense-1.43)/4.3)+25;
+//   Temperature_Ext = (float)buffer[0]*3.3/4095;
+// }
 
 /* USER CODE END Application */
 
