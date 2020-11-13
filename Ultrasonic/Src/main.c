@@ -60,8 +60,6 @@ uint8_t canRX[8] = {0, 1, 2, 3, 4, 5, 6, 7}; //CAN Bus Receive Buffer
 CAN_FilterTypeDef canfil;                    //CAN Bus Filter
 uint32_t canMailbox;                         //CAN Bus Mail box variable
 uint8_t isCanAvailable = 0;
-uint8_t stt = 0;
-uint64_t counter = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -73,6 +71,11 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+//Map value
+float map(float x, float in_min, float in_max, float out_min, float out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 // Setup GPIO
 void digitalWrite(char LedPin[3], GPIO_PinState Value)
 {
@@ -81,8 +84,6 @@ void digitalWrite(char LedPin[3], GPIO_PinState Value)
 // Read GPIO State
 GPIO_PinState digitalRead(char pin[2])
 {
-  if (pin[0] == 'B')
-    HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   GPIO_InitStruct.Pin = (uint16_t)(1 << (pin[1]) - 48);
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
@@ -93,7 +94,6 @@ GPIO_PinState digitalRead(char pin[2])
 // Start PWM
 void Pwm_Start(void)
 {
-  stt = 1;
   htim3.Instance->CCR1 = 50;
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 }
@@ -101,7 +101,6 @@ void Pwm_Start(void)
 // Stop PWM
 void Pwm_Stop(void)
 {
-  stt = 0;
   HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
 }
 // Set PWM 0 - 100
@@ -123,8 +122,8 @@ uint64_t micros(void)
 //Delay time microsecond
 void delay_us(uint64_t time)
 {
-  counter = time+ micros();
-  while (counter>micros())
+  uint64_t counter = time + micros();
+  while (counter > micros())
     ;
 }
 // Return millis from chip start
@@ -296,7 +295,7 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI14|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI14 | RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSI14State = RCC_HSI14_ON;
   RCC_OscInitStruct.HSI14CalibrationValue = 16;
@@ -310,8 +309,7 @@ void SystemClock_Config(void)
   }
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
@@ -345,9 +343,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 0 */
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM1) {
+  if (htim->Instance == TIM1)
+  {
     HAL_IncTick();
-    if(counter>0) counter--;
   }
   /* USER CODE BEGIN Callback 1 */
   if (htim->Instance == TIM17) //check if the interrupt comes from TIM17 for 1000 micros
@@ -365,11 +363,16 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
+  NVIC_SystemReset();
+  while (1)
+  {
+    /* code */
+  }
 
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

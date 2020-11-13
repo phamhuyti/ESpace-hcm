@@ -63,6 +63,7 @@ extern void serial_write(int port, uint8_t *text);
 extern void serial_Read(uint8_t uart, uint8_t size);
 extern uint8_t serial_Available(int uart);
 extern void delay_us(uint64_t time);
+extern float map(float x, float in_min, float in_max, float out_min, float out_max);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
