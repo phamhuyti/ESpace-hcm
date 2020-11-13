@@ -94,7 +94,6 @@ GPIO_PinState digitalRead(char pin[2])
 // Start PWM
 void Pwm_Start(void)
 {
-  htim3.Instance->CCR1 = 50;
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 }
 
@@ -106,12 +105,17 @@ void Pwm_Stop(void)
 // Set PWM 0 - 100
 void SetDutyCycle_PWM(uint8_t pwm)
 {
+  // htim3.Instance->CCR1 = 50;
   TIM_OC_InitTypeDef sConfigOC;
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
   sConfigOC.Pulse = pwm;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1);
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  HAL_TIM_MspPostInit(&htim3);
   // HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 }
 // Return micros from chip start
