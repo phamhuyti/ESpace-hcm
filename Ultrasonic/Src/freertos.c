@@ -76,7 +76,7 @@ float s = 0;
 /* USER CODE END FunctionPrototypes */
 
 void StartSerial(void const * argument);
-void StartLED(void const * argument);
+void Start_LED(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -128,7 +128,7 @@ void MX_FREERTOS_Init(void) {
   SerialHandle = osThreadCreate(osThread(Serial), NULL);
 
   /* definition and creation of LED */
-  osThreadDef(LED, StartLED, osPriorityIdle, 0, 128);
+  osThreadDef(LED, Start_LED, osPriorityIdle, 0, 128);
   LEDHandle = osThreadCreate(osThread(LED), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -155,25 +155,26 @@ void StartSerial(void const * argument)
     i=0;
     pre = micros();
     Pwm_Start();
-    delay_us(500);
+    delay_us(700);
     Pwm_Stop();
-    delay_us(2500);
+    delay_us(2300);
     do{
       i++;
+			delay_us(1);
       HAL_ADC_PollForConversion(&hadc,1);
       buffer[0] = HAL_ADC_GetValue(&hadc);
       HAL_ADC_PollForConversion(&hadc,1);
       buffer[1] = HAL_ADC_GetValue(&hadc);
       HAL_ADC_PollForConversion(&hadc,1);
       buffer[2] = HAL_ADC_GetValue(&hadc);
-    }while(buffer[1]<3500&&i<500);
-    if (i < 500)
+    }while(buffer[1]<2500&&i<10000);
+    if (i < 10000)
     {
       // b = micros();
       a = micros() - pre;
       s = (float)(a/2000.0)*0.320;
     }else s = 9999999;
-    delay(100);
+    delay(100 );
   }
   /* USER CODE END StartSerial */
 }
@@ -185,7 +186,7 @@ void StartSerial(void const * argument)
 * @retval None
 */
 /* USER CODE END Header_StartLED */
-void StartLED(void const * argument)
+void Start_LED(void const * argument)
 {
   /* USER CODE BEGIN StartLED */
   /* Infinite loop */
@@ -195,6 +196,8 @@ void StartLED(void const * argument)
     Temperature = ((buffer[2] * vsense - 1.43) / 4.3) + 25;
     float tem = buffer[0] * 3.3 / 4095;
     Temperature_Ext = map(tem, 1.6, 0, -30, 125);
+    digitalWrite(GREEN_LED,HIGH);
+    delay(300);
   }
   /* USER CODE END StartLED */
 }

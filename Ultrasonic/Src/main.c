@@ -263,7 +263,7 @@ int main(void)
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim17);
-  // SetDutyCycle_PWM(100);
+  SetDutyCycle_PWM(50);
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
