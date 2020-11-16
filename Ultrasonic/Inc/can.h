@@ -20,31 +20,30 @@
 #ifndef __can_H
 #define __can_H
 #ifdef __cplusplus
-extern "C"
-{
+ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-  /* USER CODE BEGIN Includes */
+/* USER CODE BEGIN Includes */
 
-  /* USER CODE END Includes */
+/* USER CODE END Includes */
 
-  extern CAN_HandleTypeDef hcan;
+extern CAN_HandleTypeDef hcan;
 
-  /* USER CODE BEGIN Private defines */
+/* USER CODE BEGIN Private defines */
 
-  /* USER CODE END Private defines */
+/* USER CODE END Private defines */
 
-  void MX_CAN_Init(void);
+void MX_CAN_Init(void);
 
-  /* USER CODE BEGIN Prototypes */
+/* USER CODE BEGIN Prototypes */
   uint8_t can_Available(void);
   void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan1);
   void can_send(uint32_t id, uint8_t *data, uint32_t len);
   void can_init(void);
-  /* USER CODE END Prototypes */
+/* USER CODE END Prototypes */
 
 #ifdef __cplusplus
 }

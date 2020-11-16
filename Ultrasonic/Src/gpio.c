@@ -48,10 +48,10 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4 | GPIO_PIN_5 | DATA_IN_OUT_Pin | GPIO_PIN_15, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4|GPIO_PIN_5|DATA_IN_OUT_Pin|GPIO_PIN_15, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1 | BLUE_LED_Pin | GREEN_LED_Pin | RED_LED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1|BLUE_LED_Pin|GREEN_LED_Pin|RED_LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PtPin */
   GPIO_InitStruct.Pin = BUTTON_1_Pin;
@@ -60,7 +60,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(BUTTON_1_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PA4 PA5 PAPin PA15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4 | GPIO_PIN_5 | DATA_IN_OUT_Pin | GPIO_PIN_15;
+  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|DATA_IN_OUT_Pin|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -79,11 +79,12 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(BUTTON_2_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB1 PBPin PBPin PBPin */
-  GPIO_InitStruct.Pin = GPIO_PIN_1 | BLUE_LED_Pin | GREEN_LED_Pin | RED_LED_Pin;
+  GPIO_InitStruct.Pin = GPIO_PIN_1|BLUE_LED_Pin|GREEN_LED_Pin|RED_LED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
 }
 
 /* USER CODE BEGIN 2 */

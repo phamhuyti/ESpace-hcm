@@ -26,7 +26,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "distance.h"
+#include "gpio.h"
+#include "usart.h"
+#include "median.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,30 +51,28 @@
 /* USER CODE BEGIN Variables */
 extern ADC_HandleTypeDef hadc;
 /* USER CODE END Variables */
-osThreadId Ultrasonic_Calculate_Handle;
-osThreadId LEDHandle;
+osThreadId Task_UltrasonicHandle;
+osThreadId Task_IdleHandle;
+osThreadId Task_SerialHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-
-extern void Pwm_Start(void);
-extern void Pwm_Stop(void);
-extern uint64_t micros(void);
-extern GPIO_PinState digitalRead(char pin[2]);
-extern void digitalWrite(char LedPin[3], GPIO_PinState Value);
-extern void serial_write(int port, uint8_t *text);
-extern void serial_Read(uint8_t uart, uint8_t size);
-extern uint8_t serial_Available(int uart);
-extern void delay_us(uint64_t time);
 float map(float x, float in_min, float in_max, float out_min, float out_max);
-float Temperature;
-float Temperature_Ext;
-uint64_t a = 0, b = 0, pre = 0;
-float s = 0;
+uint8_t Temperature;
+uint8_t Temperature_Ext;
+float resuft = 0;
+uint16_t TimeStart = 500,
+         TimeStop = 2600,
+         AmpMax = 2500,
+         AmpMin = 1450;
+median_filter_t filter;
+float values_bfr[5];
+float sort_bfr[5];
 /* USER CODE END FunctionPrototypes */
 
-void Ultrasonic_Calculate(void const *argument);
-void StartLED(void const *argument);
+void Start_Ultrasonic_Calculate(void const *argument);
+void Start_Idle(void const *argument);
+void Start_Task_Serial(void const *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -82,7 +83,9 @@ void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer, StackTyp
 static StaticTask_t xIdleTaskTCBBuffer;
 static StackType_t xIdleStack[configMINIMAL_STACK_SIZE];
 
-void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize)
+void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
+                                   StackType_t **ppxIdleTaskStackBuffer,
+                                   uint32_t *pulIdleTaskStackSize)
 {
   *ppxIdleTaskTCBBuffer = &xIdleTaskTCBBuffer;
   *ppxIdleTaskStackBuffer = &xIdleStack[0];
@@ -119,73 +122,57 @@ void MX_FREERTOS_Init(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* definition and creation of Serial */
-  osThreadDef(Serial, Ultrasonic_Calculate, osPriorityNormal, 0, 128);
-  Ultrasonic_Calculate_Handle = osThreadCreate(osThread(Serial), NULL);
+  /* definition and creation of Task_Ultrasonic */
+  osThreadDef(Task_Ultrasonic, Start_Ultrasonic_Calculate, osPriorityNormal, 0, 128);
+  Task_UltrasonicHandle = osThreadCreate(osThread(Task_Ultrasonic), NULL);
 
-  /* definition and creation of LED */
-  osThreadDef(LED, StartLED, osPriorityIdle, 0, 128);
-  LEDHandle = osThreadCreate(osThread(LED), NULL);
+  /* definition and creation of Task_Idle */
+  osThreadDef(Task_Idle, Start_Idle, osPriorityIdle, 0, 128);
+  Task_IdleHandle = osThreadCreate(osThread(Task_Idle), NULL);
+
+  /* definition and creation of Task_Serial */
+  osThreadDef(Task_Serial, Start_Task_Serial, osPriorityNormal, 0, 128);
+  Task_SerialHandle = osThreadCreate(osThread(Task_Serial), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+  median_filter_init(&filter, 5, values_bfr, sort_bfr);
   /* USER CODE END RTOS_THREADS */
 }
 
-/* USER CODE BEGIN Header_StartSerial */
+/* USER CODE BEGIN Header_Start_Ultrasonic_Calculate */
 /**
-  * @brief  Function implementing the Serial thread.
+  * @brief  Function implementing the Task_Ultrasonic thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartSerial */
-void Ultrasonic_Calculate(void const *argument)
+/* USER CODE END Header_Start_Ultrasonic_Calculate */
+void Start_Ultrasonic_Calculate(void const *argument)
 {
-  /* USER CODE BEGIN StartSerial */
+  /* USER CODE BEGIN Start_Ultrasonic_Calculate */
   /* Infinite loop */
-  uint64_t i;
   for (;;)
   {
-    i = 0;
-    pre = micros();
-    Pwm_Start();
-    delay_us(500);
-    Pwm_Stop();
-    delay_us(2500);
-    do
-    {
-      i++;
-      delay_us(1);
-      // HAL_ADC_PollForConversion(&hadc,1);
-      // Adc_buffer[0] = HAL_ADC_GetValue(&hadc);
-      // HAL_ADC_PollForConversion(&hadc,1);
-      // Adc_buffer[1] = HAL_ADC_GetValue(&hadc);
-      // HAL_ADC_PollForConversion(&hadc,1);
-      // Adc_buffer[2] = HAL_ADC_GetValue(&hadc);
-    } while (Adc_buffer[1] < 3500 && i < 3000);
-    if (i < 3000)
-    {
-      // b = micros();
-      a = micros() - pre;
-      s = (float)(a / 2000.0) * 0.320;
-    }
-    else
-      s = 99999999;
-    delay(100);
+    resuft = median_filter_add_new_value(&filter, (Distance_Caculate(TimeStart, TimeStop, AmpMax, AmpMin)));
+    // Pwm_Start();
+    // delay_us(TimeStart);
+    // Pwm_Stop();
+    // delay_us(TimeStop);
+    // delay(50);
   }
-  /* USER CODE END StartSerial */
+  /* USER CODE END Start_Ultrasonic_Calculate */
 }
 
-/* USER CODE BEGIN Header_StartLED */
+/* USER CODE BEGIN Header_Start_Idle */
 /**
-* @brief Function implementing the LED thread.
+* @brief Function implementing the Task_Idle thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartLED */
-void StartLED(void const *argument)
+/* USER CODE END Header_Start_Idle */
+void Start_Idle(void const *argument)
 {
-  /* USER CODE BEGIN StartLED */
+  /* USER CODE BEGIN Start_Idle */
   /* Infinite loop */
   for (;;)
   {
@@ -193,8 +180,61 @@ void StartLED(void const *argument)
     Temperature = ((Adc_buffer[2] * vsense - 1.43) / 4.3) + 25;
     float tem = Adc_buffer[0] * 3.3 / 4095;
     Temperature_Ext = map(tem, 1.6, 0, -30, 125);
+    digitalWrite(GREEN_LED, HIGH);
+    delay(100);
+    digitalWrite(GREEN_LED, LOW);
+    delay(100);
   }
-  /* USER CODE END StartLED */
+  /* USER CODE END Start_Idle */
+}
+
+/* USER CODE BEGIN Header_Start_Task_Serial */
+/**
+* @brief Function implementing the Task_Serial thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Start_Task_Serial */
+void Start_Task_Serial(void const *argument)
+{
+  /* USER CODE BEGIN Start_Task_Serial */
+  /* Infinite loop */
+  for (;;)
+  {
+    uint8_t buff[5];
+    sprintf(buff, "%.2f\n", resuft);
+    serial_write(1, buff);
+    serial_Read(1, 5);
+    switch (Rx_Buffer1[0])
+    {
+    case '1':
+      TimeStart = ((Rx_Buffer1[1] - 48) * 10 +
+                   (Rx_Buffer1[2] - 48)) *
+                  100;
+      Rx_Buffer1[0] = NULL;
+      break;
+    case '2':
+      TimeStop = ((Rx_Buffer1[1] - 48) * 10 + (Rx_Buffer1[2] - 48)) * 100;
+      Rx_Buffer1[0] = NULL;
+      break;
+    case '3':
+      AmpMax = ((Rx_Buffer1[1] - 48) * 1000 +
+                (Rx_Buffer1[2] - 48) * 100 +
+                (Rx_Buffer1[3] - 48) * 10 +
+                (Rx_Buffer1[4] - 48));
+      Rx_Buffer1[0] = NULL;
+      break;
+    case '4':
+      SetDutyCycle_PWM((((Rx_Buffer1[1] - 48) * 10 + (Rx_Buffer1[2] - 48))));
+      Rx_Buffer1[0] = NULL;
+      break;
+
+    default:
+      break;
+    }
+    osDelay(100);
+  }
+  /* USER CODE END Start_Task_Serial */
 }
 
 /* Private application code --------------------------------------------------*/

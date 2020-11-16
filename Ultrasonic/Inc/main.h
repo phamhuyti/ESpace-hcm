@@ -24,41 +24,39 @@
 #define __MAIN_H
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal.h"
 
-  /* Private includes ----------------------------------------------------------*/
-  /* USER CODE BEGIN Includes */
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
 
-  /* USER CODE END Includes */
+/* USER CODE END Includes */
 
-  /* Exported types ------------------------------------------------------------*/
-  /* USER CODE BEGIN ET */
+/* Exported types ------------------------------------------------------------*/
+/* USER CODE BEGIN ET */
 
-  /* USER CODE END ET */
+/* USER CODE END ET */
 
-  /* Exported constants --------------------------------------------------------*/
-  /* USER CODE BEGIN EC */
+/* Exported constants --------------------------------------------------------*/
+/* USER CODE BEGIN EC */
 
-  /* USER CODE END EC */
+/* USER CODE END EC */
 
-  /* Exported macro ------------------------------------------------------------*/
-  /* USER CODE BEGIN EM */
+/* Exported macro ------------------------------------------------------------*/
+/* USER CODE BEGIN EM */
 
-  /* USER CODE END EM */
+/* USER CODE END EM */
 
-  /* Exported functions prototypes ---------------------------------------------*/
-  void Error_Handler(void);
+/* Exported functions prototypes ---------------------------------------------*/
+void Error_Handler(void);
 
-  /* USER CODE BEGIN EFP */
-  extern uint8_t Rx_Buffer1[128]; // Uart RX Message 1
-  extern uint8_t Rx_Buffer2[128]; // Uart RX Message 2
+/* USER CODE BEGIN EFP */
+  extern uint8_t Rx_Buffer1[10]; // Uart RX Message 1
+  extern uint8_t Rx_Buffer2[10]; // Uart RX Message 2
   extern uint32_t Adc_buffer[3];
-
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -76,8 +74,8 @@ extern "C"
 #define RED_LED_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 #define delay(...) osDelay(__VA_ARGS__)
-#define GREEN_LED "B7"
-#define RED_LED "B6"
+#define GREEN_LED "B6"
+#define RED_LED "B7"
 #define BLUE_LED "B5"
 #define BUTTON1 "A1"
 #define BUTTON2 "B0"
@@ -87,9 +85,10 @@ extern "C"
 #define LOW GPIO_PIN_RESET
 #define TRUE 1
 #define FALSE 0
-  extern int strlen(uint8_t *);
+  extern int
+  strlen(uint8_t *);
 
-  /* USER CODE END Private defines */
+/* USER CODE END Private defines */
 
 #ifdef __cplusplus
 }

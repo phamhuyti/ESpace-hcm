@@ -191,17 +191,17 @@ void Pwm_Stop(void)
 // Set PWM 0 - 100
 void SetDutyCycle_PWM(uint8_t pwm)
 {
-  // htim3.Instance->CCR1 = 50;
-  TIM_OC_InitTypeDef sConfigOC;
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = pwm;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  HAL_TIM_MspPostInit(&htim3);
+  htim3.Instance->CCR1 = pwm;
+  // TIM_OC_InitTypeDef sConfigOC;
+  // sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  // sConfigOC.Pulse = pwm;
+  // sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  // sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  // if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  // {
+  //   Error_Handler();
+  // }
+  // HAL_TIM_MspPostInit(&htim3);
   // HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 }
 
@@ -233,7 +233,6 @@ uint32_t millis(void)
   * @param  htim : TIM handle
   * @retval None
   */
-
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
@@ -250,6 +249,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
   /* USER CODE END Callback 1 */
 }
+
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
