@@ -1,46 +1,49 @@
 #include "distance.h"
-#include "gpio.h"
-#include "tim.h"
+
 float s = 0;
-uint32_t tem;
 uint16_t Delta, Pre;
-float Distance_Caculate(uint16_t start, uint16_t stop, uint16_t ampmax, uint16_t ampmin)
+uint16_t values_bfr[10];
+uint16_t sort_bfr[10];
+median_filter_t filter;
+void Init_filter(void)
+{
+    median_filter_init(&filter, 10, values_bfr, sort_bfr);
+}
+
+float Distance_Caculate(distance_value_t value)
 {
     Delta = 0, Pre = 0;
     float resuft = 0;
-    uint8_t div = 0;
-    for (uint8_t i = 0; i < 5; i++)
+    uint32_t tem;
+    Pre = micros();
+    Pwm_Start();
+    delay_us(value.start);
+    Pwm_Stop();
+    delay_us(value.stop);
+    uint32_t Timeout = millis();
+    do
     {
-        Pre = micros();
-        Pwm_Start();
-        delay_us(start);
-        Pwm_Stop();
-        delay_us(stop);
-        uint32_t Timeout = millis();
-        do
+        tem = Adc_buffer[1];
+    } while (((tem < value.ampmax) && (tem > value.ampmin)) && millis() - Timeout < 100); 
+    if (((tem > value.ampmax) || (tem < value.ampmin)) && millis() - Timeout < 100)
+    {
+        Delta = micros() - Pre;
+        Delta = median_filter_add_new_value(&filter, (uint16_t)(Delta));
+        s = (float)(Delta / 2000.0) * 0.34902;
+        if (s > 3.5)
         {
-            tem = Adc_buffer[1];
-        } while (((tem < ampmax)&&(tem > ampmin)) && millis() - Timeout < 100);//1613
-        if (((tem > ampmax)||(tem < ampmin)) && millis() - Timeout < 100)
-        {
-            Delta = micros() - Pre;
-            s = (float)(Delta / 2000.0) * 0.330;
-            if ( s>3.5 )
-            {
-                s = 99999999;
-                digitalWrite(BLUE_LED, HIGH);
-            }
-            else
-            {
-                div++;
-                resuft += s;
-            }
+            s = 99999999;
+            digitalWrite(BLUE_LED, HIGH);
         }
         else
-            digitalWrite(RED_LED, HIGH);
-        delay(50);
+        {
+            resuft += s;
+        }
     }
+    else
+        digitalWrite(RED_LED, HIGH);
+    delay(50);
     digitalWrite(RED_LED, LOW);
     digitalWrite(BLUE_LED, LOW);
-    return (resuft / div);
+    return (resuft);
 }

@@ -107,7 +107,7 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim17);
   HAL_ADC_Start_DMA(&hadc, Adc_buffer, 3);
   
-  SetDutyCycle_PWM(70);
+  SetDutyCycle_PWM(50);
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */

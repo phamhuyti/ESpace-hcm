@@ -1,16 +1,10 @@
-/*
- * median.c
- *
- * Created: 18.10.2016 15:00:21
- *  Author: M43888
- */
 
 #include "median.h"
 
 /*
  * Init filter. Only works for filter of length 2n-1 n=0,1,2,3,4,5...
  */
-void median_filter_init(median_filter_t *filter, float lenght, float *bfr, float *sort_bfr)
+void median_filter_init(median_filter_t *filter, uint16_t lenght, uint16_t *bfr, uint16_t *sort_bfr)
 {
 	for (uint16_t i = 0; i < lenght; i++) {
 		bfr[i]      = i;
@@ -24,9 +18,9 @@ void median_filter_init(median_filter_t *filter, float lenght, float *bfr, float
 	filter->counter   = 0;
 }
 
-float median_filter_add_new_value(median_filter_t *filter, float new_value)
+uint16_t median_filter_add_new_value(median_filter_t *filter, uint16_t new_value)
 {
-	float old_value = filter->value_bfr[filter->counter];
+	uint16_t old_value = filter->value_bfr[filter->counter];
 	if (old_value == new_value) {
 		filter->counter++;
 		return filter->median;

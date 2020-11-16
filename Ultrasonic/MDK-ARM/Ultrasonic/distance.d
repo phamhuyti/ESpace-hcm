@@ -37,3 +37,4 @@ ultrasonic\distance.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart.h
 ultrasonic\distance.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart_ex.h
 ultrasonic\distance.o: ../Inc/gpio.h
 ultrasonic\distance.o: ../Inc/tim.h
+ultrasonic\distance.o: ../Inc/median.h

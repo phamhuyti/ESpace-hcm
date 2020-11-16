@@ -51,5 +51,5 @@ ultrasonic\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_
 ultrasonic\freertos.o: ../Inc/distance.h
 ultrasonic\freertos.o: ../Inc/gpio.h
 ultrasonic\freertos.o: ../Inc/tim.h
-ultrasonic\freertos.o: ../Inc/usart.h
 ultrasonic\freertos.o: ../Inc/median.h
+ultrasonic\freertos.o: ../Inc/usart.h

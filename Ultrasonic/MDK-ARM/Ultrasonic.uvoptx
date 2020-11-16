@@ -159,7 +159,7 @@
           <Type>0</Type>
           <LineNumber>84</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134234228</Address>
+          <Address>134234136</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -175,52 +175,37 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>resuft,0x0A</ItemText>
+          <ItemText>TimeStart,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Rx_Buffer1</ItemText>
+          <ItemText>TimeStop,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>TimeStart,0x0A</ItemText>
+          <ItemText>Adc_buffer[1],0x0A</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>TimeStop,0x0A</ItemText>
+          <ItemText>Delta,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Amp,0x0A</ItemText>
+          <ItemText>AmpMax,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>htim3,0x0A</ItemText>
+          <ItemText>AmpMin,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Adc_buffer[1],0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>7</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>tem,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>8</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Delta,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>9</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>values_bfr,0x0A</ItemText>
+          <ItemText>\\Ultrasonic\../Src/freertos.c\resuft</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
