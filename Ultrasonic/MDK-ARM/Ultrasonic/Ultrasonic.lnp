@@ -13,6 +13,7 @@
 "ultrasonic\stm32f0xx_hal_msp.o"
 "ultrasonic\stm32f0xx_hal_timebase_tim.o"
 "ultrasonic\median.o"
+"ultrasonic\flash_page.o"
 "ultrasonic\stm32f0xx_hal_adc.o"
 "ultrasonic\stm32f0xx_hal_adc_ex.o"
 "ultrasonic\stm32f0xx_hal_rcc.o"

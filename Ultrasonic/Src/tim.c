@@ -187,7 +187,6 @@ void Pwm_Stop(void)
 {
   HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
 }
-
 // Set PWM 0 - 100
 void SetDutyCycle_PWM(uint8_t pwm)
 {
@@ -212,7 +211,7 @@ uint64_t micros(void)
 }
 
 //Delay time microsecond
-void delay_us(uint64_t time)
+void delay_us(uint16_t time)
 {
   uint64_t counter = time + micros();
   while (counter > micros())

@@ -13,6 +13,7 @@
 #include "gpio.h"
 #include "usart.h"
 #include "median.h"
+#include "FLASH_PAGE.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -26,11 +27,10 @@ osThreadId Task_SerialHandle;
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 float map(float x, float in_min, float in_max, float out_min, float out_max);
-uint8_t Temperature;
-uint8_t Temperature_Ext;
 float resuft = 0, tem;
 distance_value_t data = {
     100, 2600, 2600, 1600};
+
 /* USER CODE END FunctionPrototypes */
 
 void Start_Ultrasonic_Calculate(void const *argument);
@@ -56,14 +56,19 @@ void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
   /* place for user code */
 }
 /* USER CODE END GET_IDLE_TASK_MEMORY */
-
 /**
   * @brief  FreeRTOS initialization
   * @param  None
   * @retval None
   */
+ uint8_t data2 = 'H';
+
+__IO uint32_t Rx_Data[4];
 void MX_FREERTOS_Init(void)
 {
+  Flash_Write_Data(0x0801FC00, (uint32_t*)data2);
+
+  Flash_Read_Data(0x0801FC00, Rx_Data);
   /* Create the thread(s) */
   /* definition and creation of Task_Ultrasonic */
   osThreadDef(Task_Ultrasonic, Start_Ultrasonic_Calculate, osPriorityNormal, 0, 128);
@@ -80,6 +85,7 @@ void MX_FREERTOS_Init(void)
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   Init_filter();
+
   /* USER CODE END RTOS_THREADS */
 }
 
@@ -97,7 +103,7 @@ void Start_Ultrasonic_Calculate(void const *argument)
   for (;;)
   {
     resuft = Distance_Caculate(data);
-    delay(10000);
+    delay(100);
   }
   /* USER CODE END Start_Ultrasonic_Calculate */
 }
@@ -115,10 +121,12 @@ void Start_Idle(void const *argument)
   /* Infinite loop */
   for (;;)
   {
-    float vsense = 3.3 / 4095;
-    Temperature = ((Adc_buffer[2] * vsense - 1.43) / 4.3) + 25;
-    float tem = Adc_buffer[0] * 3.3 / 4095;
-    Temperature_Ext = map(tem, 1.6, 0, -30, 125);
+    // uint8_t Temperature;
+    // uint8_t Temperature_Ext;
+    // float vsense = 3.3 / 4095;
+    // Temperature = ((Adc_buffer[2] * vsense - 1.43) / 4.3) + 25;
+    // float tem = Adc_buffer[0] * 3.3 / 4095;
+    // Temperature_Ext = map(tem, 1.6, 0, -30, 125);
     digitalWrite(GREEN_LED, HIGH);
     delay(500);
     digitalWrite(GREEN_LED, LOW);

@@ -53,3 +53,4 @@ ultrasonic\freertos.o: ../Inc/gpio.h
 ultrasonic\freertos.o: ../Inc/tim.h
 ultrasonic\freertos.o: ../Inc/median.h
 ultrasonic\freertos.o: ../Inc/usart.h
+ultrasonic\freertos.o: ../Inc/FLASH_PAGE.h

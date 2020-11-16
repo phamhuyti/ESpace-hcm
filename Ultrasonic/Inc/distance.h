@@ -13,5 +13,5 @@ typedef struct _distance_value
     uint16_t ampmin;
 } distance_value_t;
 void Init_filter(void);
-float Distance_Caculate(distance_value_t value);
+uint16_t Distance_Caculate(distance_value_t value);
 #endif /* MEDIAN_H_ */

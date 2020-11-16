@@ -24,38 +24,39 @@
 #define __MAIN_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal.h"
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
+  /* Private includes ----------------------------------------------------------*/
+  /* USER CODE BEGIN Includes */
 
-/* USER CODE END Includes */
+  /* USER CODE END Includes */
 
-/* Exported types ------------------------------------------------------------*/
-/* USER CODE BEGIN ET */
+  /* Exported types ------------------------------------------------------------*/
+  /* USER CODE BEGIN ET */
 
-/* USER CODE END ET */
+  /* USER CODE END ET */
 
-/* Exported constants --------------------------------------------------------*/
-/* USER CODE BEGIN EC */
+  /* Exported constants --------------------------------------------------------*/
+  /* USER CODE BEGIN EC */
 
-/* USER CODE END EC */
+  /* USER CODE END EC */
 
-/* Exported macro ------------------------------------------------------------*/
-/* USER CODE BEGIN EM */
+  /* Exported macro ------------------------------------------------------------*/
+  /* USER CODE BEGIN EM */
 
-/* USER CODE END EM */
+  /* USER CODE END EM */
 
-/* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
+  /* Exported functions prototypes ---------------------------------------------*/
+  void Error_Handler(void);
 
-/* USER CODE BEGIN EFP */
-  extern uint8_t Rx_Buffer1[10]; // Uart RX Message 1
-  extern uint8_t Rx_Buffer2[10]; // Uart RX Message 2
+  /* USER CODE BEGIN EFP */
+  extern uint8_t Rx_Buffer1[5]; // Uart RX Message 1
+  extern uint8_t Rx_Buffer2[5]; // Uart RX Message 2
   extern uint32_t Adc_buffer[3];
 /* USER CODE END EFP */
 
@@ -88,7 +89,9 @@ void Error_Handler(void);
   extern int
   strlen(uint8_t *);
 
-/* USER CODE END Private defines */
+#define DATA_START_ADDRESS ((uint32_t)0x08007000)   //Page 127
+#define LENGTH_START_ADDRESS ((uint32_t)0x8006C10) //Page 126
+  /* USER CODE END Private defines */
 
 #ifdef __cplusplus
 }

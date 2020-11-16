@@ -26,7 +26,6 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -50,8 +49,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint8_t Rx_Buffer1[10]; // Uart RX Message 1
-uint8_t Rx_Buffer2[10]; // Uart RX Message 2
+uint8_t Rx_Buffer1[5]; // Uart RX Message 1
+uint8_t Rx_Buffer2[5]; // Uart RX Message 2
 uint32_t Adc_buffer[3];
 
 /* USER CODE END PV */
@@ -105,8 +104,7 @@ int main(void)
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim17);
-  HAL_ADC_Start_DMA(&hadc, Adc_buffer, 3);
-  
+  HAL_ADC_Start_DMA(&hadc, (uint32_t*)Adc_buffer, 3);
   SetDutyCycle_PWM(50);
   /* USER CODE END 2 */
 

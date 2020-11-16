@@ -458,6 +458,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\median.c</FilePath>
             </File>
+            <File>
+              <FileName>FlASH_PAGE.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\FlASH_PAGE.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

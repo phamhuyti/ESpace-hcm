@@ -48,7 +48,7 @@ extern "C"
   void Pwm_Stop(void);
   void SetDutyCycle_PWM(uint8_t pwm);
   uint64_t micros(void);
-  void delay_us(uint64_t time);
+  void delay_us(uint16_t time);
   uint32_t millis(void);
   /* USER CODE END Prototypes */
 

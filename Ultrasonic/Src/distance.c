@@ -1,7 +1,5 @@
 #include "distance.h"
 
-float s = 0;
-uint16_t Delta, Pre;
 uint16_t values_bfr[10];
 uint16_t sort_bfr[10];
 median_filter_t filter;
@@ -10,8 +8,10 @@ void Init_filter(void)
     median_filter_init(&filter, 10, values_bfr, sort_bfr);
 }
 
-float Distance_Caculate(distance_value_t value)
+uint16_t Distance_Caculate(distance_value_t value)
 {
+    float s = 0;
+    uint16_t Delta, Pre;
     Delta = 0, Pre = 0;
     float resuft = 0;
     uint32_t tem;
@@ -24,7 +24,7 @@ float Distance_Caculate(distance_value_t value)
     do
     {
         tem = Adc_buffer[1];
-    } while (((tem < value.ampmax) && (tem > value.ampmin)) && millis() - Timeout < 100); 
+    } while (((tem < value.ampmax) && (tem > value.ampmin)) && millis() - Timeout < 100);
     if (((tem > value.ampmax) || (tem < value.ampmin)) && millis() - Timeout < 100)
     {
         Delta = micros() - Pre;
@@ -45,5 +45,5 @@ float Distance_Caculate(distance_value_t value)
     delay(50);
     digitalWrite(RED_LED, LOW);
     digitalWrite(BLUE_LED, LOW);
-    return (resuft);
+    return (resuft*100);
 }
