@@ -62,7 +62,6 @@ void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
   * @retval None
   */
  uint8_t data2 = 'H';
-
 __IO uint32_t Rx_Data[4];
 void MX_FREERTOS_Init(void)
 {
