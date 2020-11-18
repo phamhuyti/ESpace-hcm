@@ -1,11 +1,11 @@
 #include "distance.h"
 
-uint16_t values_bfr[10];
-uint16_t sort_bfr[10];
+uint16_t values_bfr[3];
+uint16_t sort_bfr[3];
 median_filter_t filter;
 void Init_filter(void)
 {
-    median_filter_init(&filter, 10, values_bfr, sort_bfr);
+    median_filter_init(&filter, 3, values_bfr, sort_bfr);
 }
 
 uint16_t Distance_Caculate(distance_value_t value)
@@ -42,8 +42,8 @@ uint16_t Distance_Caculate(distance_value_t value)
     }
     else
         digitalWrite(RED_LED, HIGH);
-    delay(50);
+    delay(100);
     digitalWrite(RED_LED, LOW);
     digitalWrite(BLUE_LED, LOW);
-    return (resuft*100);
+    return (resuft * 100);
 }

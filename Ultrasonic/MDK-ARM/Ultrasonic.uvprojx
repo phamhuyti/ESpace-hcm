@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F042x6</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;                                  ../Drivers/STM32F0xx_HAL_Driver/Inc;                                  ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy;                                  ../Middlewares/Third_Party/FreeRTOS/Source/include;                                  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;                                  ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0;                                  ../Drivers/CMSIS/Device/ST/STM32F0xx/Include;                                  ../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Inc;                                   ../Drivers/STM32F0xx_HAL_Driver/Inc;                                   ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy;                                   ../Middlewares/Third_Party/FreeRTOS/Source/include;                                   ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;                                   ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0;                                   ../Drivers/CMSIS/Device/ST/STM32F0xx/Include;                                   ../Drivers/CMSIS/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -399,6 +399,16 @@
               <FilePath>..\Src\distance.c</FilePath>
             </File>
             <File>
+              <FileName>median.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\median.c</FilePath>
+            </File>
+            <File>
+              <FileName>FlASH_PAGE.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\FlASH_PAGE.c</FilePath>
+            </File>
+            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/main.c</FilePath>
@@ -454,14 +464,9 @@
               <FilePath>../Src/stm32f0xx_hal_timebase_tim.c</FilePath>
             </File>
             <File>
-              <FileName>median.c</FileName>
+              <FileName>task.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\median.c</FilePath>
-            </File>
-            <File>
-              <FileName>FlASH_PAGE.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\FlASH_PAGE.c</FilePath>
+              <FilePath>..\Src\task.c</FilePath>
             </File>
           </Files>
         </Group>

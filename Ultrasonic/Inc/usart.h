@@ -46,8 +46,8 @@ void MX_USART2_UART_Init(void);
   extern DMA_HandleTypeDef hdma_usart1_tx;
   extern DMA_HandleTypeDef hdma_usart2_rx;
   extern DMA_HandleTypeDef hdma_usart2_tx;
-  void serial_write(int port, uint8_t *text);
-  void serial_Read(uint8_t uart, uint8_t size);
+  void serial_write(int port, uint8_t *text, uint16_t size);
+  void serial_Read(uint8_t uart, uint8_t size, uint8_t *Buffer);
   uint8_t serial_Available(int uart);
   extern void digitalWrite(char LedPin[3], GPIO_PinState Value);
 
