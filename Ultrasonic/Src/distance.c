@@ -1,4 +1,7 @@
 #include "distance.h"
+#include "gpio.h"
+#include "tim.h"
+#include "median.h"
 
 uint16_t values_bfr[3];
 uint16_t sort_bfr[3];

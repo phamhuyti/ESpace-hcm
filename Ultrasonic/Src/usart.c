@@ -19,7 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
-
+#include "tim.h"
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -264,7 +264,7 @@ void serial_write(int port, uint8_t *text, uint16_t size)
   {
     HAL_UART_AbortReceive(&huart2);
     HAL_UART_Transmit_DMA(&huart2, text, size); //check strlen variables main.h
-    delay_us(200000);
+    delay(200);
     HAL_UART_AbortReceive(&huart2);
   }
 }

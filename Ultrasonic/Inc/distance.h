@@ -2,9 +2,7 @@
 #define DISTANCE_H_
 
 #include "main.h"
-#include "gpio.h"
-#include "tim.h"
-#include "median.h"
+
 typedef struct _distance_value
 {
     uint16_t start;

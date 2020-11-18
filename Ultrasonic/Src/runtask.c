@@ -1,11 +1,13 @@
-#include "task.h"
+#include "runtask.h"
 #include "main.h"
 #include "distance.h"
 #include "usart.h"
-
+#include "tim.h"
+#include "cmsis_os.h"
 uint16_t resuft = 0;
 distance_value_t data = {
     100, 2600, 2600, 1600};
+extern osStatus osDelay (uint32_t millisec);
 /* USER CODE BEGIN Header_Start_Ultrasonic_Calculate */
 /**
   * @brief  Function implementing the Task_Ultrasonic thread.
@@ -136,7 +138,7 @@ void Start_Task_RS485(void const *argument)
             for (uint8_t i = 0; i < 3; i++)
             {
                 pre = millis();
-                if (55 << resuft << 100)
+                if (55 < resuft < 100)
                     serial_write(2, yes, 4);
                 else
                     serial_write(2, no, 4);

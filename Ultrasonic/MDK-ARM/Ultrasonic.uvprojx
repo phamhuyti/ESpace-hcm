@@ -404,11 +404,6 @@
               <FilePath>..\Src\median.c</FilePath>
             </File>
             <File>
-              <FileName>FlASH_PAGE.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\FlASH_PAGE.c</FilePath>
-            </File>
-            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/main.c</FilePath>
@@ -464,9 +459,9 @@
               <FilePath>../Src/stm32f0xx_hal_timebase_tim.c</FilePath>
             </File>
             <File>
-              <FileName>task.c</FileName>
+              <FileName>runtask.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\task.c</FilePath>
+              <FilePath>..\Src\runtask.c</FilePath>
             </File>
           </Files>
         </Group>

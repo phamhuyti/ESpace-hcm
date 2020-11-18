@@ -1,5 +1,5 @@
-#ifndef __TASK_H
-#define __TASK_H
+#ifndef __RUNTASK_H
+#define __RUNTASK_H
 
 void Start_Ultrasonic_Calculate(void const * argument);
 void Start_Idle(void const * argument);
